@@ -1,144 +1,87 @@
 # Image Editor App
 
-A full-featured Next.js web application for searching images from Unsplash and adding custom captions, text, and shapes using a powerful Fabric.js canvas editor.
+A Next.js application that lets users search free images (Unsplash), load a selected image into a Fabric.js canvas, add editable captions and shapes, manage layers, and export the final composition as a PNG.
 
-## Features
+Live links
 
-### 1. Image Search
-- Search millions of high-quality images from Unsplash
-- Responsive grid layout with image thumbnails
-- Debounced search with loading states
-- Toast notifications for errors and empty results
+- CodeSandbox workspace (editable): https://codesandbox.io/p/github/Amritansh-Tripathi/image-editor-app-amritansh-task-vega6/draft/fervent-wave
+- Public preview (deployed from sandbox): https://pdxxk4-3000.csb.app/
 
-### 2. Canvas Editor
-- Fabric.js-powered canvas for image editing
-- Add and edit text with custom fonts and colors
-- Add shapes: rectangles, circles, triangles, and polygons
-- Drag, resize, and rotate all objects
-- Layer management: bring forward / send backward
-- Delete individual objects or reset entire canvas
+Overview / Key features
 
-### 3. Download Feature
-- Export canvas as high-quality PNG
-- Confirmation dialog before download
-- Automatic file naming with timestamps
+- Image search via Unsplash with responsive results grid.
+- "Add Captions" opens the selected image in the canvas editor (query-parameter or persisted state).
+- Fabric.js canvas:
+  - Add and edit text (fabric.Textbox).
+  - Add shapes: rectangle, circle, triangle, polygon.
+  - Drag, resize, rotate, delete, and reorder layers.
+  - Background image is fixed behind other objects.
+- Download edited canvas as high-quality PNG (with confirmation dialog).
+- Debug panel showing current canvas layers and attributes.
 
-### 4. Debug Panel
-- Real-time canvas state visualization
-- Shows all layers with type, position, size, and color
-- Collapsible panel for better workspace
-- Color-coded badges for different object types
+Technical stack
 
-## Tech Stack
+- Next.js (App Router)
+- TypeScript
+- Tailwind CSS
+- Fabric.js
+- Zustand (client state)
+- Unsplash API
 
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS v4
-- **UI Components**: shadcn/ui + Origin UI
-- **Canvas**: Fabric.js
-- **State Management**: Zustand
-- **API**: Unsplash API
+Project structure (high level)
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+ installed
-- Unsplash API access key (get one at https://unsplash.com/developers)
-
-### Installation
-
-1. Clone the repository or download the ZIP file
-
-2. Install dependencies:
-   \`\`\`bash
-   npm install
-   \`\`\`
-
-3. Set up environment variables:
-   - Create a `.env.local` file in the root directory
-   - Add your Unsplash API key:
-     \`\`\`
-     UNSPLASH_ACCESS_KEY=your_unsplash_access_key_here
-     \`\`\`
-   - Or add it directly in your Vercel Project Settings under Environment Variables
-
-4. Run the development server:
-   \`\`\`bash
-   npm run dev
-   \`\`\`
-
-5. Open [http://localhost:3000](http://localhost:3000) in your browser
-
-## Environment Variables
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `UNSPLASH_ACCESS_KEY` | Your Unsplash API access key from https://unsplash.com/developers | Yes |
-
-**Note**: The API key is kept secure on the server side and never exposed to the client.
-
-## Project Structure
-
-\`\`\`
+```
 ├── app/
-│   ├── api/
-│   │   └── search/
-│   │       └── route.ts      # Server-side Unsplash API handler
-│   ├── page.tsx              # Home page with image search
-│   ├── editor/
-│   │   └── page.tsx          # Canvas editor page
-│   ├── layout.tsx            # Root layout
-│   └── globals.css           # Global styles and theme
+│   ├── api/search/route.ts      # Server-side Unsplash proxy
+│   ├── page.tsx                 # Home / search page
+│   └── editor/page.tsx          # Canvas editor page
 ├── components/
-│   ├── search-bar.tsx        # Search input with debounce
-│   ├── image-grid.tsx        # Image results grid
-│   ├── canvas-editor.tsx     # Main canvas component
-│   ├── toolbar.tsx           # Editing tools
-│   ├── debug-panel.tsx       # Canvas state viewer
-│   ├── navbar.tsx            # Navigation bar
-│   └── footer.tsx            # Footer with attribution
+│   ├── search-bar.tsx
+│   ├── image-grid.tsx
+│   ├── canvas-editor.tsx
+│   ├── toolbar.tsx
+│   ├── debug-panel.tsx
+│   ├── navbar.tsx
+│   └── footer.tsx
 ├── lib/
-│   ├── types.ts              # TypeScript interfaces
-│   └── store.ts              # Zustand state management
+│   ├── types.ts
+│   └── store.ts                 # Zustand store (persist)
 └── utils/
-    └── api.ts                # API client for internal routes
-\`\`\`
+    └── api.ts                   # Client API helpers
+```
 
-## Usage
+Getting started (local)
 
-1. **Search for Images**: Enter a search term in the search bar on the home page
-2. **Select an Image**: Click "Add Captions" on any image to open the editor
-3. **Edit on Canvas**:
-   - Click the text icon to add editable text
-   - Click shape icons to add rectangles, circles, triangles, or polygons
-   - Drag objects to move them
-   - Use corner handles to resize
-   - Use arrow buttons to change layer order
-   - Click delete to remove selected objects
-4. **Download**: Click the "Download" button to export your creation as PNG
-5. **Debug**: View the debug panel on the right to see all canvas layers and their properties
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Create `.env.local` with:
+   ```
+   UNSPLASH_ACCESS_KEY=your_unsplash_access_key_here
+   ```
+3. Run dev server:
+   ```bash
+   npm run dev
+   ```
+4. Open http://localhost:3000
 
-## API Setup
+Usage summary
 
-To get your Unsplash API key:
+1. Search images on the home page.
+2. Click "Add Captions" on a result — navigates to `/editor?image=<encoded-url>` and opens the editor.
+3. Use the toolbar to add/edit text and shapes, reorder layers, delete objects.
+4. Download the final PNG via the Download button.
 
-1. Go to https://unsplash.com/developers
-2. Create a new application (it's free!)
-3. Copy your Access Key
-4. Add it to your `.env.local` file or Vercel environment variables as `UNSPLASH_ACCESS_KEY`
+Environment variables
 
-## Deployment
+- UNSPLASH_ACCESS_KEY — Unsplash Access Key (required for API requests).
 
-Deploy to Vercel with one click:
+Deployment notes
 
-1. Push your code to GitHub
-2. Import the repository in Vercel
-3. Add `UNSPLASH_ACCESS_KEY` as an environment variable in Project Settings
-4. Deploy!
+- The editor prefers an encoded `image` query parameter (e.g. `/editor?image=<encoded-url>`) for reliable loading in sandboxed environments and for shareable editor links.
+- Zustand is used for client state and is most effective when deployed on a dedicated server or persistent hosting (it also uses localStorage persistence as a convenience fallback).
 
-## Credits
+Credits
 
-Developed by **Amritansh Tripathi** — Vega6 Task Submission 2025
-
-Built with v0 by Vercel
+- Developed by Amritansh Tripathi for vega6 interview task.

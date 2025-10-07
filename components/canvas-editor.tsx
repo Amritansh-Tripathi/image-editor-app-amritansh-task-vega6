@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import * as fabric from "fabric";
 import { useImageStore } from "@/lib/store"; // ✅ using image store
 
@@ -19,12 +19,18 @@ interface CanvasLayer {
 
 export default function CanvasEditor() {
   const { selectedImage } = useImageStore(); // getting the selected image from the useImageStore
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  // prefer query param 'image' (encoded URL). fallback to selectedImage from store.
+  const imageParam = searchParams?.get("image") || null;
+  const imageUrlFromParam = imageParam ? decodeURIComponent(imageParam) : null;
+  const imageUrl = imageUrlFromParam || selectedImage?.urls?.regular;
+
   const canvasRef = useRef<fabric.Canvas | null>(null);
   const elRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [layers, setLayers] = useState<CanvasLayer[]>([]);
-  const router = useRouter();
 
   useEffect(() => {
     if (!elRef.current) return;
@@ -51,9 +57,9 @@ export default function CanvasEditor() {
     c.backgroundColor = "#fafafa";
     c.renderAll();
 
-    // ✅ Load the image from useImageStore instead of src
-    console.log('Selected Image URL:', selectedImage);
-    if (selectedImage && selectedImage.urls?.regular) {
+    // ✅ Load the image from query param first, otherwise use store
+    console.log("Selected Image URL:", imageUrl);
+    if (imageUrl) {
       setIsLoading(true);
       setError(null);
 
@@ -68,7 +74,7 @@ export default function CanvasEditor() {
         // ignore
       }
 
-      const url = selectedImage.urls.regular;
+      const url = imageUrl;
       const imgEl = new Image();
       imgEl.crossOrigin = "anonymous";
       imgEl.onload = () => {
@@ -109,9 +115,9 @@ export default function CanvasEditor() {
       };
       imgEl.src = url;
     } else {
-      setError("No image selected from store.");
+      setError("No image provided. Redirecting home.");
       setIsLoading(false);
-      // redirect to home if nothing selected
+      // only redirect when no image param and no store image
       router.replace("/");
     }
 
@@ -119,7 +125,7 @@ export default function CanvasEditor() {
       window.removeEventListener("resize", resizeCanvas);
       c.dispose();
     };
-  }, [selectedImage]);
+  }, [imageParam, selectedImage]);
 
   // 🔧 Z-Order Management
   const refreshZOrder = (canvas: fabric.Canvas) => {
@@ -339,7 +345,9 @@ export default function CanvasEditor() {
 
       {/* Debug Layers */}
       <div className="mt-4 w-full max-w-5xl">
-        <h3 className="text-lg font-semibold mb-2">Canvas Layers (Debug Log)</h3>
+        <h3 className="text-lg font-semibold mb-2">
+          Canvas Layers (Debug Log)
+        </h3>
         <pre className="bg-gray-100 text-gray-800 text-xs p-3 rounded overflow-auto max-h-60">
           {JSON.stringify(layers, null, 2)}
         </pre>

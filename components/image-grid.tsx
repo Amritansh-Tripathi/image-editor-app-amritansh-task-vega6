@@ -14,8 +14,17 @@ export function ImageGrid() {
 
   const handleAddCaptions = (image: any) => {
     // ✅ Store the entire image object for the editor
-    setSelectedImage(image);
-    router.push("/editor");
+    // push the image public url as a query param (encoded)
+    const url = image.urls?.regular || image.urls?.full || image.urls?.small;
+    if (url) {
+      // persist in store as well (optional)
+      setSelectedImage(image);
+      router.push(`/editor?image=${encodeURIComponent(url)}`);
+    } else {
+      // fallback: still set in store and navigate
+      setSelectedImage(image);
+      router.push("/editor");
+    }
   };
 
   if (!searchQuery) {
